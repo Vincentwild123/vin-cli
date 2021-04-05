@@ -1,6 +1,5 @@
 #! /usr/bin/env node
 
-
 const {
     program,
     Option
@@ -12,29 +11,25 @@ const download = require('./utils/download.js')
 const spinner = require('./utils/spinner.js')
 const chalk = require('chalk')
 const promps = require('./promps.js')
+const templates = require('./config.js')
+const insert = require('./insert.js');
 const {
-    dirname
-} = require('path');
+    type
+} = require('os');
 program.version('0.0.1', '-V, --version', 'vin脚手架版本');
-//选项
-program
-    .option('-D, --debug <fileName...>', 'output extra debugging')
-    .option('-T, --test <fileName..>', 'test the files')
-    .addOption(new Option('-T, --template <type>', 'template type').choices(['react', 'vue', 'normal']))
-
 //命令
 program
     .command('init <dirName>')
     .description('choose download template')
     .action(dirName => {
-        var config = _.assign({
-            template: '',
-            description: '',
-            sass: false,
-            less: false
-        }, {})
         inquirer.prompt(promps).then(function (answers) {
             console.log()
+            const meta = {};
+            meta.name = answers.name || "no name";
+            meta.author = answers.author || 'anonymous';
+            meta.description = answers.description || 'no description';
+            meta.version = answers.version || '1.0.0';
+            meta.template = answers.template || 'React';
             //新建项目文件夹
             fs.mkdirSync(dirName, (err) => {
                 if (err) {
@@ -44,23 +39,31 @@ program
             let remoteTemplateUrl = '';
             switch (answers.template) {
                 case 'React':
-                    remoteTemplateUrl = 'krasimir/react-webpack-starter';
+                    remoteTemplateUrl = templates.React;
                     break;
                 case 'Vue':
-                    remoteTemplateUrl = 'vuejs-templates/pwa';
+                    remoteTemplateUrl = templates.Vue;
+                    break;
+                case 'Express':
+                    remoteTemplateUrl = templates.Express;
                     break;
                 default:
+                    throw new Error('no template match!')
                     break;
             }
-            spinner.start('正在下载模板');
+            spinner.start('downloading template');
             download(remoteTemplateUrl, dirName).then(() => {
-                spinner.succeed('模板下载成功!');
+                spinner.succeed('template download success!');
+                try {
+                    insert(dirName, meta);
+                } catch (err) {
+                    console.log(err);
+                }
                 console.log();
-                console.log(chalk.cyan('你可以进行以下操作:'))
+                console.log(chalk.cyan('Next, you could'))
                 console.log(chalk.cyan('cd ' + dirName))
                 console.log(chalk.cyan('yarn'))
-                console.log(chalk.cyan('yarn run dev'))
-
+                console.log(chalk.cyan('yarn start'))
             }).catch((err) => {
                 spinner.fail(err)
             });

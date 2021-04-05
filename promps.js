@@ -1,10 +1,29 @@
 module.exports = [{
+        type: 'input',
+        name: 'name',
+        message: 'Project name'
+    }, {
+        type: 'input',
+        name: 'author',
+        message: 'author'
+    },
+    {
+        type: 'input',
+        name: 'description',
+        message: 'description'
+    },
+    {
+        type: 'input',
+        name: 'version',
+        message: 'version'
+    },
+    {
         type: 'list',
         name: 'template',
-        message: '请选择模板',
+        message: 'choose a template',
         validate: function (input) {
             if (!input) {
-                return '模板不能为空'
+                return 'template should not be empty'
             }
             return true
         },
@@ -15,28 +34,10 @@ module.exports = [{
             {
                 name: 'Vue',
                 value: 'Vue'
-            }
-        ]
-    }, {
-        type: 'input',
-        name: 'moduleDescription',
-        message: '请输入模块描述'
-    },
-    {
-        type: 'list',
-        name: 'cssPretreatment',
-        message: '想用什么css预处理器呢',
-        choices: [{
-                name: 'Sass',
-                value: 'sass'
-            },
-            {
-                name: 'Less',
-                value: 'less'
             }, {
-                name: 'stylus',
-                value: 'stylus'
+                name: 'Express',
+                value: 'Express'
             }
         ]
-    }
+    },
 ]

@@ -12,7 +12,6 @@
     "download-git-repo": "^3.0.2",
     "inquirer": "^8.0.0",
     "loadsh": "^0.0.4",
-    "ora": "^5.4.0",
-    "vue-cli": "^2.9.6"
+    "ora": "^5.4.0"
   }
 }

@@ -21,7 +21,7 @@ module.exports = function downTemplateFile(url, dir) {
         //下载模板
         download(url, dir, function (err) {
             if (err) {
-                reject(error);
+                reject(err);
                 return;
             }
             resolve();
