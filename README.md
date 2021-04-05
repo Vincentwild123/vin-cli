@@ -1,2 +1,2 @@
 ### flow Guide 
-![https://github.com/Vincentwild123/vin-cli/blob/master/flowChart.png](flow guide)
+![flow guide](https://github.com/Vincentwild123/vin-cli/blob/master/flowChart.png)
