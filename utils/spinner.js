@@ -2,8 +2,7 @@ const ora = require('ora')
 const config = {
     text: 'downloading',
     hideCursor: true,
-    color: 'green',
-    indent: 1,
+    color: 'white',
 }
 const spinner = ora(config);
 
