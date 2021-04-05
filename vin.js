@@ -28,12 +28,10 @@ program
         inquirer.prompt(promps).then(function (answers) {
             console.log()
             const meta = {};
-            meta.email = answers.email;
-            meta.name = answers.name;
-            meta.author = answers.author;
-            meta.description = answers.description;
-            meta.version = answers.version;
-            meta.template = answers.template;
+
+            for(const key of Object.key(answers)){
+                meta[key] = answers[key];
+            }
             //新建项目文件夹
             fs.mkdirSync(dirName, (err) => {
                 if (err) {
