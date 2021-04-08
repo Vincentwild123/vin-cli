@@ -7,12 +7,16 @@ const {
 const _ = require('loadsh')
 const inquirer = require('inquirer')
 const fs = require('fs');
-const download = require('./utils/download.js')
-const spinner = require('./utils/spinner.js')
+const download = require('../utils/download.js')
+const spinner = require('../utils/spinner.js')
 const chalk = require('chalk')
-const promps = require('./promps.js')
-const templates = require('./config.js')
-const insert = require('./insert.js');
+const promps = require('../lib/promps.js')
+const templates = require('../lib/config.js')
+const insert = require('../lib/insert.js');
+const {
+    exec,
+    spawn
+} = require('child_process');
 program.version('0.0.1', '-V, --version', 'vin脚手架版本');
 //命令
 program
@@ -26,10 +30,11 @@ program
             message: 'Project name'
         })
         inquirer.prompt(promps).then(function (answers) {
+            console.dir(answers)
             console.log()
             const meta = {};
 
-            for(const key of Object.key(answers)){
+            for (const key of Object.keys(answers)) {
                 meta[key] = answers[key];
             }
             //新建项目文件夹
@@ -62,10 +67,36 @@ program
                     console.log(err);
                 }
                 console.log();
-                console.log(chalk.white('Next, you could'))
-                console.log(chalk.white('cd ' + dirName))
-                console.log(chalk.white('yarn'))
-                console.log(chalk.white('yarn start'))
+                //choose no auto install node_modules
+                if (!meta.install) {
+                    console.log(chalk.white('Next, you could'))
+                    console.log(chalk.white('cd ' + dirName))
+                    console.log(chalk.white('yarn'))
+                    console.log(chalk.white('yarn start'))
+                } else {
+                    exec('cd ' + dirName, (error, stdout, stderr) => {
+                        if (error) {
+                            console.error(`执行的错误: ${error}`);
+                            return;
+                        }
+                        //run  npm install/yarn in sub dir
+                        let command = meta.installer === 'yarn' ? "yarn" : "npm install";
+                        try {
+                            let child = exec(command, {
+                                cwd: './' + dirName
+                            });
+                            child.stdout.on('data', function (data) {
+                                console.log(data);
+                            })
+                            child.stderr.on('data', function (data) {
+                                //throw errors
+                                console.log(data);
+                            });
+                        } catch (err) {
+                            console.error(err);
+                        }
+                    });
+                }
             }).catch((err) => {
                 spinner.fail(err)
                 console.log(chalk.red(err));
@@ -75,6 +106,6 @@ program
     .on('--help', function () {
         console.log(' Examples:')
         console.log('')
-        console.log('$ vinvin init')
+        console.log('$ vin init <dirname>')
     })
 program.parse(process.argv)
