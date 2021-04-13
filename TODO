@@ -1,0 +1,9 @@
+✔ BUG: check the file ifexist before show the question @done(21-04-13 10:12)
+
+✔ BUG: catch the error in execSync function @done(21-04-13 10:18)
+
+✔ BUG: install template net timeout @done(21-04-13 10:17)
+
+☐ JSON.parse
+
+✘ FEATRUE: check the path iflocal @cancelled(21-04-13 10:29)
