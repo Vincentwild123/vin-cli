@@ -4,6 +4,7 @@
 
 ✔ BUG: install template net timeout @done(21-04-13 10:17)
 
-☐ JSON.parse
+✔ BUG: JSON.parse @done(21-04-13 20:13)
+
 
 ✘ FEATRUE: check the path iflocal @cancelled(21-04-13 10:29)

@@ -13,13 +13,10 @@ const {
     version
 } = require('../lib/config.js')
 const insert = require('../lib/insert.js');
-const {
-    execSync,
-    exec
-} = require('child_process');
-const getInstallCommander = require('../utils/getInstallCommander.js');
+
 const getTemplateRepo = require('../utils/getTemplateRepo.js')
 const handleProcessExit = require('../lib/handleProcessExit.js');
+const installNodeModules = require('../lib/installNodeModules.js')
 const {
     dirname
 } = require('path');
@@ -72,11 +69,8 @@ program
                     console.log(chalk.white(`${meta.installer} start`))
                 } else {
                     //run npm install/yarn in sub dir
-                    let command = getInstallCommander(meta.installer);
                     try {
-                        exec(command, {
-                            cwd: './' + dirName,
-                        });
+                        installNodeModules(meta.installer, './' + dirName)
                     } catch (err) {
                         console.error(chalk.red('node modules install failed!'));
                         console.log(chalk.red(err));
@@ -86,6 +80,7 @@ program
                 spinner.fail(err)
                 console.log(chalk.red(err));
                 console.log(chalk.green('please check the net status.'))
+                process.exit(1);
             });
         })
 
