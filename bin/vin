@@ -6,80 +6,85 @@ const {
 const inquirer = require('inquirer')
 const fs = require('fs');
 const download = require('../lib/download.js')
-const spinner = require('../utils/spinner.js')
-const chalk = require('chalk')
 const promps = require('../lib/promps.js')
+const handleProcessExit = require('../lib/handleProcessExit.js');
+const installNodeModules = require('../lib/installNodeModules.js')
 const {
     version
 } = require('../lib/config.js')
 const insert = require('../lib/insert.js');
-
 const getTemplateRepo = require('../utils/getTemplateRepo.js')
-const handleProcessExit = require('../lib/handleProcessExit.js');
-const installNodeModules = require('../lib/installNodeModules.js')
+const spinner = require('../utils/spinner.js')
 const {
-    dirname
-} = require('path');
-program.version(version, '-V, --version', 'vin脚手架版本');
+    errorLogger,
+    infoLogger,
+    successLogger
+} = require('../utils/loggers.js')
+program.version(version, '-V, --version', 'vin-cli version');
 //命令
 program
     .command('create <dirName>')
     .description('choose download template')
     .action(dirName => {
-        handleProcessExit(dirname);
-        //check the dirname ifexisted
+        //customize the process exit status
+        handleProcessExit(dirName);
+        //Check if the folder name exists
         if (fs.existsSync(dirName)) {
-            console.log(chalk.red("dir name had existed!"))
+            errorLogger('The folder name already exists!')
             process.exit(0)
         }
+        //unshift the question about the project name default is folder name
         promps.unshift({
             type: 'input',
             name: 'name',
             default: dirName,
             message: 'Project name'
         })
+        //show the question to collect user meta data
         inquirer.prompt(promps).then(function (answers) {
-            console.log()
             const meta = {};
-            for (const key of Object.keys(answers)) {
-                meta[key] = answers[key];
-            }
-            //新建项目文件夹
+            Object.assign(meta, answers);
+            //New a folder
             fs.mkdirSync(dirName, (err) => {
                 if (err) {
-                    throw new Error('dir name already exists');
+                    errorLogger(err)
+                    process.exit(0);
                 }
             })
+            //get the user template name
             let templateRepo = getTemplateRepo(meta.template);
-            spinner.start('downloading...');
+
+            //------------------download begin ----------------------- //
+            //use a clock to mark the time cost
+
+            spinner.start('downloading template');
+
             download(templateRepo, dirName).then(() => {
                 spinner.succeed('template download success!');
                 try {
                     insert(dirName, meta);
                 } catch (err) {
-                    console.log(chalk.red(err));
+                    errorLogger(err);
                     process.exit(1)
                 }
-                console.log();
-                //choose no auto install node_modules
                 if (!meta.autoInstall) {
-                    console.log(chalk.white('next,you could'))
-                    console.log(chalk.white('cd ' + dirName))
-                    console.log(chalk.white(meta.installer === 'yarn' ? 'yarn' : `${meta.installer} install`))
-                    console.log(chalk.white(`${meta.installer} start`))
+                    infoLogger('next,you could')
+                    infoLogger('cd ' + dirName);
+                    infoLogger(meta.installer === 'yarn' ? 'yarn' : `${meta.installer} install`);
+                    infoLogger(`${meta.installer} start`)
                 } else {
-                    //run npm install/yarn in sub dir
+                    //run npm install/yarn in sub path
                     try {
                         installNodeModules(meta.installer, './' + dirName)
                     } catch (err) {
-                        console.error(chalk.red('node modules install failed!'));
-                        console.log(chalk.red(err));
+                        errorLogger(err);
+                        process.exit(0);
                     }
                 }
             }).catch((err) => {
                 spinner.fail(err)
-                console.log(chalk.red(err));
-                console.log(chalk.green('please check the net status.'))
+                errorLogger(err);
+                successLogger('please check the net status.')
                 process.exit(1);
             });
         })
