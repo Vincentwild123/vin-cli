@@ -14,16 +14,22 @@ const {
 } = require('../lib/config.js')
 const insert = require('../lib/insert.js');
 const {
-    execSync
+    execSync,
+    exec
 } = require('child_process');
 const getInstallCommander = require('../utils/getInstallCommander.js');
 const getTemplateRepo = require('../utils/getTemplateRepo.js')
+const handleProcessExit = require('../lib/handleProcessExit.js');
+const {
+    dirname
+} = require('path');
 program.version(version, '-V, --version', 'vin脚手架版本');
 //命令
 program
     .command('create <dirName>')
     .description('choose download template')
     .action(dirName => {
+        handleProcessExit(dirname);
         //check the dirname ifexisted
         if (fs.existsSync(dirName)) {
             console.log(chalk.red("dir name had existed!"))
@@ -55,6 +61,7 @@ program
                     insert(dirName, meta);
                 } catch (err) {
                     console.log(chalk.red(err));
+                    process.exit(1)
                 }
                 console.log();
                 //choose no auto install node_modules
@@ -67,9 +74,8 @@ program
                     //run npm install/yarn in sub dir
                     let command = getInstallCommander(meta.installer);
                     try {
-                        execSync(command, {
+                        exec(command, {
                             cwd: './' + dirName,
-                            stdio: 'inherit'
                         });
                     } catch (err) {
                         console.error(chalk.red('node modules install failed!'));
