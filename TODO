@@ -6,5 +6,11 @@
 
 ✔ BUG: JSON.parse @done(21-04-13 20:13)
 
-
 ✘ FEATRUE: check the path iflocal @cancelled(21-04-13 10:29)
+
+✘ BUG: if user not choose auto install,don't show installer choice @cancelled(21-04-18 19:44)
+
+✔ FEATURE: when spinner run ,hidden the cursor @done(21-04-18 19:44)
+
+
+☐ BUG: twice time log "everything rollback"

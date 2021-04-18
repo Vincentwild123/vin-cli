@@ -21,10 +21,11 @@ const {
     successLogger
 } = require('../utils/loggers.js')
 program.version(version, '-V, --version', 'vin-cli version');
-//命令
+//commander
 program
     .command('create <dirName>')
-    .description('choose download template')
+    .usage("vin create <dirName>")
+    .description('choose template')
     .action(dirName => {
         //customize the process exit status
         handleProcessExit(dirName);
@@ -33,7 +34,7 @@ program
             errorLogger('The folder name already exists!')
             process.exit(0)
         }
-        //unshift the question about the project name default is folder name
+        //unshift the question about the project name , default is folder name
         promps.unshift({
             type: 'input',
             name: 'name',
@@ -53,38 +54,39 @@ program
             })
             //get the user template name
             let templateRepo = getTemplateRepo(meta.template);
-
             //------------------download begin ----------------------- //
-            //use a clock to mark the time cost
-
             spinner.start('downloading template');
-
+            console.time('Total time');
             download(templateRepo, dirName).then(() => {
                 spinner.succeed('template download success!');
                 try {
                     insert(dirName, meta);
                 } catch (err) {
                     errorLogger(err);
+                    //insert user meta data fail need to rollback 
                     process.exit(1)
                 }
-                if (!meta.autoInstall) {
-                    infoLogger('next,you could')
-                    infoLogger('cd ' + dirName);
-                    infoLogger(meta.installer === 'yarn' ? 'yarn' : `${meta.installer} install`);
-                    infoLogger(`${meta.installer} start`)
-                } else {
+                if (meta.autoInstall) {
                     //run npm install/yarn in sub path
                     try {
                         installNodeModules(meta.installer, './' + dirName)
                     } catch (err) {
                         errorLogger(err);
+                        errorLogger('Please delete the node_modules folder and install it manually again');
                         process.exit(0);
                     }
+                } else {
+                    infoLogger('next,you could')
+                    infoLogger('cd ' + dirName);
+                    infoLogger(meta.installer === 'yarn' ? 'yarn' : `${meta.installer} install`);
+                    infoLogger(`${meta.installer} start`)
                 }
+                console.timeEnd()
             }).catch((err) => {
                 spinner.fail(err)
                 errorLogger(err);
-                successLogger('please check the net status.')
+                errorLogger('Please check your network');
+                //template download fail need to rollback 
                 process.exit(1);
             });
         })
