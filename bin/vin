@@ -89,6 +89,8 @@ program
                 //template download fail need to rollback 
                 process.exit(1);
             });
+        }).catch((err) => {
+            errorLogger('inquirer Error:', err);
         })
 
     })
